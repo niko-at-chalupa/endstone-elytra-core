@@ -1,7 +1,7 @@
 use std::fmt::Error;
 
 pub trait Plugin {
-    pub fn name(&self) -> &str;
+     fn name(&self) -> &str;
 }
 
 pub struct PendingPlugin {
@@ -9,7 +9,7 @@ pub struct PendingPlugin {
 }
 
 impl Plugin for PendingPlugin {
-    pub fn name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 }
