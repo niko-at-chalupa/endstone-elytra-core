@@ -30,3 +30,9 @@ impl Plugin for AvailablePlugin {
         &self.name
     }
 }
+
+impl AvailablePlugin {
+    pub fn releases_url(&self) -> &str {
+        &self.releases_url
+    }
+}
