@@ -47,3 +47,8 @@ impl AvailablePlugin {
         &self.releases_url
     }
 }
+
+pub enum PluginType {
+    Available(AvailablePlugin),
+    Pending(PendingPlugin),
+}
