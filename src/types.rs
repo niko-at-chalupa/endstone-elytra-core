@@ -1,16 +1,22 @@
 use std::fmt::Error;
 
 pub trait Plugin {
-     fn name(&self) -> &str;
+    fn name(&self) -> &str;
+    fn repository_url(&self) -> &str;
 }
 
 pub struct PendingPlugin {
     name: Box<str>,
+    repository_url: Box<str>,
 }
 
 impl Plugin for PendingPlugin {
     fn name(&self) -> &str {
         &self.name
+    }
+
+    fn repository_url(&self) -> &str {
+        &self.repository_url
     }
 }
 
@@ -23,11 +29,16 @@ impl PendingPlugin {
 pub struct AvailablePlugin {
     name: Box<str>,
     releases_url: Box<str>,
+    repository_url: Box<str>,
 }
 
 impl Plugin for AvailablePlugin {
     fn name(&self) -> &str {
         &self.name
+    }
+
+    fn repository_url(&self) -> &str {
+        &self.repository_url
     }
 }
 
