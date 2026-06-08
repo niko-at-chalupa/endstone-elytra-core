@@ -5,7 +5,7 @@ pub trait Plugin {
     fn repository_url(&self) -> &str;
     // EndGit plugins have their own IDs, so sometimes we need it
     // as None.
-    fn id(&self) -> Option<u64>;
+    fn id(&self) -> Option<u64> { None }
 }
 
 pub struct PendingPlugin {
