@@ -1,0 +1,7 @@
+[package]
+name = "elytra-endgit-converter"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nikos-endgit-wrapper = { git = "https://github.com/niko-at-chalupa/nikos-endgit-wrapper" }
