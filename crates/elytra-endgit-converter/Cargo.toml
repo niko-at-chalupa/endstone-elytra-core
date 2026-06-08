@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 nikos-endgit-wrapper = { git = "https://github.com/niko-at-chalupa/nikos-endgit-wrapper" }
+elytra-core = { path = "../elytra-core" }
+tokio = { version = "1.52.3", features = ["full"] }
+tracing-test = "0.2.6"
+tracing = "0.1.44"
