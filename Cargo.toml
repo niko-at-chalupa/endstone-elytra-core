@@ -7,4 +7,3 @@ resolver = "2"
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
 postcard = { version = "1.0", features = ["alloc"] }
-# Define other shared tools here like tokio, ratatui, etc.
