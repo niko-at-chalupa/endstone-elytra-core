@@ -630,8 +630,8 @@ dependencies = [
 
 [[package]]
 name = "nikos-endgit-wrapper"
-version = "0.1.0"
-source = "git+https://github.com/niko-at-chalupa/nikos-endgit-wrapper#302f4e883684a914a9e7f95a7e275391054fcd2d"
+version = "0.1.1"
+source = "git+https://github.com/niko-at-chalupa/nikos-endgit-wrapper#62f57d0918983f684754870452652203ebb790ec"
 dependencies = [
  "reqwest",
  "serde",

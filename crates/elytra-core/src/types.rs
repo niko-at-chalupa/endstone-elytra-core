@@ -3,11 +3,14 @@ use std::fmt::Error;
 pub trait Plugin {
     fn name(&self) -> &str;
     fn repository_url(&self) -> &str;
+    // EndGit plugins have their own IDs, so sometimes we d
+    fn id(&self) -> u64;
 }
 
 pub struct PendingPlugin {
     name: Box<str>,
     repository_url: Box<str>,
+    id: u64,
 }
 
 impl Plugin for PendingPlugin {
@@ -17,6 +20,10 @@ impl Plugin for PendingPlugin {
 
     fn repository_url(&self) -> &str {
         &self.repository_url
+    }
+
+    fn id(&self) -> u64 {
+        self.id
     }
 }
 
@@ -30,6 +37,7 @@ pub struct AvailablePlugin {
     name: Box<str>,
     releases_url: Box<str>,
     repository_url: Box<str>,
+    id: u64,
 }
 
 impl Plugin for AvailablePlugin {
@@ -39,6 +47,10 @@ impl Plugin for AvailablePlugin {
 
     fn repository_url(&self) -> &str {
         &self.repository_url
+    }
+
+    fn id(&self) -> u64 {
+        self.id
     }
 }
 
