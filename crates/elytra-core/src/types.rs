@@ -37,6 +37,17 @@ impl Plugin for PendingPlugin {
 }
 
 impl PendingPlugin {
+    pub fn new(name: &str, repository_url: &str) -> Self {
+        let kebabbed_name = kebabify(name);
+        let id = compute_plugin_id(&kebabbed_name);
+        Self {
+            name: name.to_owned().into_boxed_str(),
+            repository_url: repository_url.to_owned().into_boxed_str(),
+            id: id,
+            kebabbed_name: kebabbed_name,
+        }
+    }
+
     pub fn approve(&self) -> Result<AvailablePlugin, Error> {
         todo!()
     }
@@ -44,7 +55,7 @@ impl PendingPlugin {
 
 pub struct AvailablePlugin {
     name: Box<str>,
-    releases_url: Box<str>,
+    releases_url: Option<Box<str>>,
     repository_url: Box<str>,
     id: u64,
     kebabbed_name: Box<str>,
@@ -69,8 +80,20 @@ impl Plugin for AvailablePlugin {
 }
 
 impl AvailablePlugin {
-    pub fn releases_url(&self) -> &str {
-        &self.releases_url
+    pub fn new(name: &str, repository_url: &str) -> Self {
+        let kebabbed_name = kebabify(name);
+        let id = compute_plugin_id(&kebabbed_name);
+        Self {
+            name: name.to_owned().into_boxed_str(),
+            repository_url: repository_url.to_owned().into_boxed_str(),
+            id: id,
+            kebabbed_name: kebabbed_name,
+            releases_url: None,
+        }
+    }
+    
+    pub fn releases_url(&self) -> Option<&str> {
+        self.releases_url.as_deref()
     }
 }
 
