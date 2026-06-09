@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "crates/elytra-core", "crates/elytra-endgit-converter",
+    "crates/elytra-core", "crates/elytra-endgit-converter", "crates/elytra-server",
 ]
 resolver = "2"
 
