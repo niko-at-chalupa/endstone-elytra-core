@@ -1,4 +1,5 @@
 use nikos_endgit_wrapper::client::{Client, ApiError};
+use elytra_core::id::{kebabify, compute_plugin_id};
 use crate::types::EndGitPluginAdapter;
 
 pub struct EndGitConverterClient {
@@ -13,7 +14,7 @@ impl EndGitConverterClient {
 
     pub async fn get_plugin(&self, name: &str) -> Result<EndGitPluginAdapter, ApiError> {
         let endgit_plugin = self.client.get_plugin(name).await?;
-        Ok(EndGitPluginAdapter::new(endgit_plugin))
+        Ok(EndGitPluginAdapter::new(endgit_plugin, compute_plugin_id(&kebabify(name))))
     }
 }
 

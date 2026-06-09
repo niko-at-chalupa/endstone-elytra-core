@@ -152,6 +152,9 @@ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 [[package]]
 name = "elytra-core"
 version = "0.1.0"
+dependencies = [
+ "twox-hash",
+]
 
 [[package]]
 name = "elytra-endgit-converter"
@@ -167,6 +170,10 @@ dependencies = [
 [[package]]
 name = "elytra-server"
 version = "0.1.0"
+dependencies = [
+ "elytra-core",
+ "elytra-endgit-converter",
+]
 
 [[package]]
 name = "encoding_rs"
@@ -1510,6 +1517,15 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+
+[[package]]
+name = "twox-hash"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ea3136b675547379c4bd395ca6b938e5ad3c3d20fad76e7fe85f9e0d011419c"
+dependencies = [
+ "rand",
+]
 
 [[package]]
 name = "unicode-ident"
