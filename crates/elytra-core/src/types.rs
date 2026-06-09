@@ -1,7 +1,9 @@
 use std::fmt::Error;
+use crate::id::{compute_plugin_id, kebabify};
 
 pub trait Plugin {
     fn name(&self) -> &str;
+    fn kebabbed_name(&self) -> &str;
     fn repository_url(&self) -> &str;
     // ~~EndGit plugins have their own IDs, so sometimes we need it
     // as None.~~
@@ -13,6 +15,7 @@ pub struct PendingPlugin {
     name: Box<str>,
     repository_url: Box<str>,
     id: u64,
+    kebabbed_name: Box<str>,
 }
 
 impl Plugin for PendingPlugin {
@@ -27,6 +30,10 @@ impl Plugin for PendingPlugin {
     fn id(&self) -> u64 {
         self.id
     }
+
+    fn kebabbed_name(&self) -> &str {
+        &self.kebabbed_name
+    }
 }
 
 impl PendingPlugin {
@@ -40,6 +47,7 @@ pub struct AvailablePlugin {
     releases_url: Box<str>,
     repository_url: Box<str>,
     id: u64,
+    kebabbed_name: Box<str>,
 }
 
 impl Plugin for AvailablePlugin {
@@ -53,6 +61,10 @@ impl Plugin for AvailablePlugin {
 
     fn id(&self) -> u64 {
         self.id
+    }
+
+    fn kebabbed_name(&self) -> &str {
+        &self.kebabbed_name
     }
 }
 

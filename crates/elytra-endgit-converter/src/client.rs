@@ -14,7 +14,7 @@ impl EndGitConverterClient {
 
     pub async fn get_plugin(&self, name: &str) -> Result<EndGitPluginAdapter, ApiError> {
         let endgit_plugin = self.client.get_plugin(name).await?;
-        Ok(EndGitPluginAdapter::new(endgit_plugin, compute_plugin_id(&kebabify(name))))
+        Ok(EndGitPluginAdapter::new(endgit_plugin))
     }
 }
 
