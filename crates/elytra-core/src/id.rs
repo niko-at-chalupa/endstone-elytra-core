@@ -39,3 +39,29 @@ pub fn kebabify(name: &str) -> Box<str> {
 
     slug.into_boxed_str()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    #[test]
+    #[tracing_test::traced_test]
+    fn kebab_stuff() {
+        // unkebbabed: kebabbed
+        let names = HashMap::from([
+            ("endstone chat relay", "endstone-chat-relay"),
+            ("endstone-chatrelay", "endstone-chatrelay"),
+            ("endstoneChatRelay", "endstonechatrelay"),
+            ("endstone--chat-relay---chat-", "endstone-chat-relay-chat"),
+        ]);
+
+        for name in names.iter() {
+            let kebabbed_name: &str = &kebabify(&name.0);
+            
+            tracing::info!("{}, {}", kebabbed_name, name.1);
+
+            assert_eq!(&kebabbed_name, name.1);
+        }
+    }
+}
