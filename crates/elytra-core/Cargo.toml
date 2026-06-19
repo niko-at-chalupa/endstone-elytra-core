@@ -5,6 +5,5 @@ edition = "2024"
 dependencies.workspace = true
 
 [dependencies]
-twox-hash = "2.1.2"
 tracing-test = "0.2.6"
 tracing = "0.1.44"

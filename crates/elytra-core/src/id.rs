@@ -1,16 +1,3 @@
-use std::hash::Hasher;
-use twox_hash::XxHash64;
-
-const HASH_SEED: u64 = u64::from_be_bytes(*b"elytra!\0");
-
-/// Generates a plugin ID that derives from the kebab-case name
-/// of plugins.
-pub fn compute_plugin_id(kebab_name: &str) -> u64 {
-    let mut hasher = XxHash64::with_seed(HASH_SEED);
-    hasher.write(kebab_name.as_bytes());
-    hasher.finish()
-}
-
 /// Converts a display name into a kebabbed name.
 ///
 /// Kebabbed names should be unique per plugin and they determine the ID.

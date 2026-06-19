@@ -1,5 +1,5 @@
 use std::fmt::Error;
-use crate::id::{compute_plugin_id, kebabify};
+use crate::id::kebabify;
 
 pub trait Plugin {
     fn name(&self) -> &str;
@@ -37,9 +37,8 @@ impl Plugin for PendingPlugin {
 }
 
 impl PendingPlugin {
-    pub fn new(name: &str, repository_url: &str) -> Self {
+    pub fn new(name: &str, repository_url: &str, id: u64) -> Self {
         let kebabbed_name = kebabify(name);
-        let id = compute_plugin_id(&kebabbed_name);
         Self {
             name: name.to_owned().into_boxed_str(),
             repository_url: repository_url.to_owned().into_boxed_str(),
@@ -80,9 +79,8 @@ impl Plugin for AvailablePlugin {
 }
 
 impl AvailablePlugin {
-    pub fn new(name: &str, repository_url: &str) -> Self {
+    pub fn new(name: &str, repository_url: &str, id: u64) -> Self {
         let kebabbed_name = kebabify(name);
-        let id = compute_plugin_id(&kebabbed_name);
         Self {
             name: name.to_owned().into_boxed_str(),
             repository_url: repository_url.to_owned().into_boxed_str(),

@@ -1,5 +1,5 @@
 use elytra_core::types::Plugin;
-use elytra_core::id::{compute_plugin_id, kebabify};
+use elytra_core::id::kebabify;
 use nikos_endgit_wrapper::types::Plugin as EndGitPlugin;
 
 #[derive(Debug)]
@@ -12,9 +12,8 @@ pub struct EndGitPluginAdapter {
 }
 
 impl EndGitPluginAdapter {
-    pub fn new(plugin: EndGitPlugin) -> Self {
+    pub fn new(plugin: EndGitPlugin, id: u64) -> Self {
         let kebabbed_name = kebabify(&plugin.name);
-        let id = compute_plugin_id(&kebabbed_name);
         Self {
             plugin: plugin.clone(),
             name: plugin.name.into_boxed_str(),
