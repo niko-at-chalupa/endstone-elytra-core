@@ -7,18 +7,16 @@ pub struct EndGitPluginAdapter {
     plugin: EndGitPlugin,
     name: Box<str>,
     repository_url: Box<str>,
-    id: u64,
     kebabbed_name: Box<str>,
 }
 
 impl EndGitPluginAdapter {
-    pub fn new(plugin: EndGitPlugin, id: u64) -> Self {
+    pub fn new(plugin: EndGitPlugin) -> Self {
         let kebabbed_name = kebabify(&plugin.name);
         Self {
             plugin: plugin.clone(),
             name: plugin.name.into_boxed_str(),
             repository_url: plugin.repo_url.into_boxed_str(),
-            id: id,
             kebabbed_name: kebabbed_name,
         }
     }
@@ -35,10 +33,6 @@ impl Plugin for EndGitPluginAdapter {
 
     fn repository_url(&self) -> &str {
         &self.repository_url
-    }
-
-    fn id(&self) -> u64 {
-        self.id
     }
 
     fn kebabbed_name(&self) -> &str {
