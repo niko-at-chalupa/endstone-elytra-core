@@ -84,6 +84,9 @@ impl AvailablePlugin {
         self.id
     }
  
+    pub fn set_releases_url(&mut self, url: Box<str>) {
+        self.releases_url = Some(url);
+    }
 }
 
 pub enum PluginType {

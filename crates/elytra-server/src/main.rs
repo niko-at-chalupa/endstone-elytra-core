@@ -2,6 +2,8 @@ use axum::{routing::get, Router, response::Redirect};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
+mod database;
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
