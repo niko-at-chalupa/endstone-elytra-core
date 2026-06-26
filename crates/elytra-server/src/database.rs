@@ -1,13 +1,14 @@
-use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
+use sqlx::{sqlite::{SqlitePoolOptions, SqliteConnectOptions}, Sqlite, SqlitePool, Transaction};
 use elytra_core::types::{AvailablePlugin, PendingPlugin, Plugin};
+use std::str::FromStr;
 
-/// Wraps the Postgres connection pool and all plugin-related queries.
+/// Wraps the SQLite connection pool and all plugin-related queries.
 ///
 /// This is the single place that knows about SQL. Everything outside this
 /// file should go through `Database`, not `sqlx`, directly.
 #[derive(Clone)]
 pub struct Database {
-    pool: PgPool,
+    pool: SqlitePool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -23,13 +24,16 @@ pub enum DatabaseError {
 }
 
 impl Database {
-    /// Connects to Postgres and runs migrations.
+    /// Connects to SQLite and runs migrations.
     ///
-    /// `database_url` looks like: `postgres://user:pass@localhost/elytra`
+    /// `database_url` looks like: `sqlite://plugins.db` or `sqlite::memory:`
     pub async fn connect(database_url: &str) -> Result<Self, DatabaseError> {
-        let pool = PgPoolOptions::new()
+        let options = SqliteConnectOptions::from_str(database_url)?
+            .create_if_missing(true);
+
+        let pool = SqlitePoolOptions::new()
             .max_connections(10)
-            .connect(database_url)
+            .connect_with(options)
             .await?;
 
         let db = Self { pool };
@@ -38,23 +42,22 @@ impl Database {
     }
 
     /// Creates a `Database` from an existing pool, e.g. for testing.
-    pub fn from_pool(pool: PgPool) -> Self {
+    pub fn from_pool(pool: SqlitePool) -> Self {
         Self { pool }
     }
 
     /// Creates the tables if they don't already exist.
-    ///
-    /// This is intentionally simple (no migration framework) since the
-    /// schema is small right now. If it grows, swap this for `sqlx::migrate!`.
     async fn migrate(&self) -> Result<(), DatabaseError> {
+        // Changed BIGSERIAL to INTEGER PRIMARY KEY AUTOINCREMENT
+        // Changed TIMESTAMPTZ to DATETIME and now() to CURRENT_TIMESTAMP
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS pending_plugins (
-                id BIGSERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 kebabbed_name TEXT NOT NULL UNIQUE,
                 repository_url TEXT NOT NULL,
-                submitted_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             "#,
         )
@@ -64,12 +67,12 @@ impl Database {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS available_plugins (
-                id BIGSERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 kebabbed_name TEXT NOT NULL UNIQUE,
                 repository_url TEXT NOT NULL,
                 releases_url TEXT,
-                approved_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                approved_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             "#,
         )
@@ -86,10 +89,11 @@ impl Database {
         &self,
         plugin: &PendingPlugin,
     ) -> Result<i64, DatabaseError> {
+        // Changed $1, $2 to ? for idiomatic SQLite parameters
         let result = sqlx::query_scalar::<_, i64>(
             r#"
             INSERT INTO pending_plugins (name, kebabbed_name, repository_url)
-            VALUES ($1, $2, $3)
+            VALUES (?, ?, ?)
             RETURNING id
             "#,
         )
@@ -129,13 +133,14 @@ impl Database {
         &self,
         pending_id: i64,
     ) -> Result<AvailablePlugin, DatabaseError> {
-        let mut tx: Transaction<'_, Postgres> = self.pool.begin().await?;
+        // Changed Postgres to Sqlite
+        let mut tx: Transaction<'_, Sqlite> = self.pool.begin().await?;
 
         let pending = sqlx::query_as::<_, PendingPluginRow>(
             r#"
             SELECT id, name, kebabbed_name, repository_url, submitted_at
             FROM pending_plugins
-            WHERE id = $1
+            WHERE id = ?
             "#,
         )
         .bind(pending_id)
@@ -146,7 +151,7 @@ impl Database {
         let new_id = sqlx::query_scalar::<_, i64>(
             r#"
             INSERT INTO available_plugins (name, kebabbed_name, repository_url)
-            VALUES ($1, $2, $3)
+            VALUES (?, ?, ?)
             RETURNING id
             "#,
         )
@@ -156,7 +161,7 @@ impl Database {
         .fetch_one(&mut *tx)
         .await?;
 
-        sqlx::query("DELETE FROM pending_plugins WHERE id = $1")
+        sqlx::query("DELETE FROM pending_plugins WHERE id = ?")
             .bind(pending_id)
             .execute(&mut *tx)
             .await?;
@@ -172,7 +177,7 @@ impl Database {
 
     /// Rejects (deletes) a pending plugin without approving it.
     pub async fn reject_pending_plugin(&self, pending_id: i64) -> Result<(), DatabaseError> {
-        let result = sqlx::query("DELETE FROM pending_plugins WHERE id = $1")
+        let result = sqlx::query("DELETE FROM pending_plugins WHERE id = ?")
             .bind(pending_id)
             .execute(&self.pool)
             .await?;
@@ -195,7 +200,7 @@ impl Database {
             r#"
             SELECT id, name, kebabbed_name, repository_url, releases_url, approved_at
             FROM available_plugins
-            WHERE id = $1
+            WHERE id = ?
             "#,
         )
         .bind(id)
@@ -205,7 +210,7 @@ impl Database {
         Ok(row.map(Into::into))
     }
 
-    /// Fetches an available plugin by its kebabbed name (e.g. for URL lookups).
+    /// Fetches an available plugin by its kebabbed name.
     pub async fn get_available_plugin_by_kebabbed_name(
         &self,
         kebabbed_name: &str,
@@ -214,7 +219,7 @@ impl Database {
             r#"
             SELECT id, name, kebabbed_name, repository_url, releases_url, approved_at
             FROM available_plugins
-            WHERE kebabbed_name = $1
+            WHERE kebabbed_name = ?
             "#,
         )
         .bind(kebabbed_name)
@@ -245,7 +250,7 @@ impl Database {
         id: i64,
         releases_url: Option<&str>,
     ) -> Result<(), DatabaseError> {
-        sqlx::query("UPDATE available_plugins SET releases_url = $1 WHERE id = $2")
+        sqlx::query("UPDATE available_plugins SET releases_url = ? WHERE id = ?")
             .bind(releases_url)
             .bind(id)
             .execute(&self.pool)
@@ -255,8 +260,7 @@ impl Database {
     }
 }
 
-/// Raw row shape for `pending_plugins`. Kept separate from `PendingPlugin`
-/// since the in-memory type has no `id` field, but the DB row needs one.
+/// Raw row shape for `pending_plugins`.
 #[derive(sqlx::FromRow)]
 pub struct PendingPluginRow {
     pub id: i64,
@@ -266,16 +270,16 @@ pub struct PendingPluginRow {
     pub submitted_at: chrono::DateTime<chrono::Utc>,
 }
 
-/// Raw row shape for `available_plugins`, converted into `AvailablePlugin`.
+/// Raw row shape for `available_plugins`.
 #[derive(sqlx::FromRow)]
 struct AvailablePluginRow {
     id: i64,
     name: String,
-    #[allow(dead_code)] // read from DB but AvailablePlugin re-derives this from `name`
+    #[allow(dead_code)]
     kebabbed_name: String,
     repository_url: String,
     releases_url: Option<String>,
-    #[allow(dead_code)] // not currently exposed on AvailablePlugin
+    #[allow(dead_code)]
     approved_at: chrono::DateTime<chrono::Utc>,
 }
 

@@ -47,7 +47,7 @@ mod tests {
         let client = EndGitConverterClient::new()?;
         let plugins = client.all_plugins().await?;
 
-        tracing::info!("{:?}", plugins);
+        dbg!("{:?}", &plugins);
 
         // Very dumb assertion, nonetheless will work.
         assert!(plugins.len() > 3);
