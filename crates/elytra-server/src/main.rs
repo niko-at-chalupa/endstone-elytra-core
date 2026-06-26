@@ -38,7 +38,6 @@ async fn main() {
 
         let plugins_hashmap = state.endgit.plugins();
         info!("Found & loaded {} Endgit plugins.", plugins_hashmap.len());
-        dbg!("{}", plugins_hashmap);
     }
 
     let address = "0.0.0.0:3000";

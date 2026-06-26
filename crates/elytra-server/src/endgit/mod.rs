@@ -5,16 +5,16 @@ use std::collections::HashMap;
 
 pub struct Endgit {
     client: converter::client::EndGitConverterClient,
-    plugins: HashMap<Box<str>, converter::types::EndGitPluginAdapter>,
+    plugins: HashMap<String, converter::types::EndGitPluginAdapter>,
 }
 
 impl Endgit {
     pub async fn fill(&mut self) -> Result<(), nikos_endgit_wrapper::client::ApiError> {
         let all_plugins = self.client.all_plugins().await?;
-        let mut plugin_map: HashMap<Box<str>, converter::types::EndGitPluginAdapter> = HashMap::new();
+        let mut plugin_map: HashMap<String, converter::types::EndGitPluginAdapter> = HashMap::new();
 
         for plugin in all_plugins {
-            plugin_map.insert(Box::from(plugin.kebabbed_name()), plugin);
+            plugin_map.insert(plugin.kebabbed_name().to_owned(), plugin);
         }
 
         self.plugins = plugin_map;
@@ -29,7 +29,7 @@ impl Endgit {
         })
     }
 
-    pub fn plugins(&self) -> &HashMap<Box<str>, converter::types::EndGitPluginAdapter> {
+    pub fn plugins(&self) -> &HashMap<String, converter::types::EndGitPluginAdapter> {
         &self.plugins
     }
 }
@@ -45,7 +45,8 @@ mod tests {
         let mut endgit = Endgit::new()?;
         endgit.fill().await?;
 
-        tracing::info!("{:?}", endgit.plugins);
+        tracing::info!("{:?}", &endgit.plugins);
+        assert!(endgit.plugins.len() > 5);
 
         Ok(())
     }
