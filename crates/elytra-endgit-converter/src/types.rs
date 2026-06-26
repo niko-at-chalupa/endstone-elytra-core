@@ -12,10 +12,10 @@ pub struct EndGitPluginAdapter {
 
 impl EndGitPluginAdapter {
     pub fn new(plugin: EndGitPlugin) -> Self {
-        let kebabbed_name = kebabify(&plugin.name);
+        let kebabbed_name = kebabify(&plugin.display_name);
         Self {
             plugin: plugin.clone(),
-            name: plugin.name.into_boxed_str(),
+            name: plugin.display_name.into_boxed_str(),
             repository_url: plugin.repo_url.into_boxed_str(),
             kebabbed_name: kebabbed_name,
         }
