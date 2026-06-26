@@ -15,6 +15,15 @@ impl EndGitConverterClient {
         let endgit_plugin = self.client.get_plugin(name).await?;
         Ok(EndGitPluginAdapter::new(endgit_plugin))
     }
+
+    pub async fn all_plugins(&self) -> Result<Vec<EndGitPluginAdapter>, ApiError> {
+        let plugins = self.client.search_plugins("").await?;
+        let mut adapted_plugins: Vec<EndGitPluginAdapter> = vec![];
+        for plugin in plugins.data.plugins {
+            adapted_plugins.push(EndGitPluginAdapter::new(plugin));
+        }
+        Ok(adapted_plugins)
+    }
 }
 
 #[cfg(test)]
@@ -28,6 +37,20 @@ mod tests {
         let plugin = client.get_plugin("endstone-tebex-integration").await?;
 
         tracing::info!("{:?}", plugin);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[tracing_test::traced_test]
+    async fn test_all_plugins() -> Result<(), ApiError> {
+        let client = EndGitConverterClient::new()?;
+        let plugins = client.all_plugins().await?;
+
+        tracing::info!("{:?}", plugins);
+
+        // Very dumb assertion, nonetheless will work.
+        assert!(plugins.len() > 3);
 
         Ok(())
     }
