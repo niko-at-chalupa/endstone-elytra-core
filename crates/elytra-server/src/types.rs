@@ -1,16 +1,13 @@
-use crate::database;
-
 #[cfg(feature = "endgit")]
 use crate::endgit;
 
 pub struct AppState {
-    pub db: database::Database,
     #[cfg(feature = "endgit")]
     pub endgit: endgit::Endgit,
 }
 
 impl AppState {
-    pub fn new(db: database::Database) -> Self {
+    pub fn new() -> Self {
         #[cfg(feature = "endgit")]
         let endgit = match endgit::Endgit::new() {
             Ok(v) => v,
@@ -19,7 +16,6 @@ impl AppState {
             }
         };
         Self {
-            db: db,
             #[cfg(feature = "endgit")]
             endgit: endgit,
         }

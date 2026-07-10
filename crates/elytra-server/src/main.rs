@@ -2,7 +2,6 @@ use axum::{routing::get, Router, response::Redirect};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-mod database;
 mod dto;
 mod routes;
 mod types;
@@ -26,8 +25,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(root));
 
-    let db = database::Database::connect("sqlite://plugins.db").await.expect("Failed to create database");
-    let mut state = types::AppState::new(db);
+    let mut state = types::AppState::new();
 
     #[cfg(feature = "endgit")]
     {
