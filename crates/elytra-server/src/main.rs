@@ -6,9 +6,6 @@ mod dto;
 mod routes;
 mod types;
 
-#[cfg(feature = "endgit")]
-mod endgit;
-
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
@@ -26,20 +23,6 @@ async fn main() {
         .route("/", get(root));
 
     let mut state = types::AppState::new();
-
-    #[cfg(feature = "endgit")]
-    {
-        info!("Endgit features are enabled, finding and loading Endgit plugins...");
-        match state.endgit.fill().await {
-            Ok(_) => (),
-            Err(e) => {
-                std::panic::panic_any(e);
-            }
-        }
-
-        let plugins_hashmap = state.endgit.plugins();
-        info!("Found & loaded {} Endgit plugins.", plugins_hashmap.len());
-    }
 
     let address = "0.0.0.0:3000";
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
